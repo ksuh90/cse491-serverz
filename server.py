@@ -26,3 +26,5 @@ while True:
     c.close()
 
 # took some code from http://stackoverflow.com/questions/8315209/sending-http-headers-with-python 
+
+# this is an awesome piece of code! well done.
