@@ -1,5 +1,0 @@
-2015-01-23  Peng  Zhang  <zhangpe2@msu.edu> * add 2 functions to server.py, test_server.py updated
-2014-01-16  Peng  Zhang	 <zhangpe2@msu.edu> * Clone the repository to QSSS, modified code of server.py.
-2014-01-07  Titus Brown  <t@Titus-MacBook-Air-2.local>
-
- * Initialized repository, created server.py and README.
