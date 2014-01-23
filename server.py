@@ -27,12 +27,11 @@ def handle_connection(conn):
    conn.send('HTTP/1.0 200 OK\r\n')
    conn.send('Content-type: text/html\r\n')
    conn.send('\r\n')
+   request = (conn.recv(1000)).split()
 
-   loc = (conn.recv(1000)).split()
-   if len(loc):
-      method = loc[0]
-      loc = loc[1]
-
+   if len(request):
+      method = request[0]
+      loc = request[1]
       if method == 'POST':
          handle_post(conn)
       else:
