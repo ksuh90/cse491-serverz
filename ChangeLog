@@ -5,3 +5,8 @@
  2014-01-14 Kang-One Suh
 
  * Added response header and html.
+
+ 2014-01-22 Kang-One Suh
+
+ * Fixed hw1 solution and refactored server.py and test_server.py.
+
