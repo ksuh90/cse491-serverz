@@ -10,3 +10,6 @@
 
  * Fixed hw1 solution and refactored server.py and test_server.py.
 
+ 2014-01-30 Kang-One Suh
+
+ * Revised code for hw3 solution for both server.py and test_server.py.
