@@ -32,7 +32,7 @@ class FakeConnection(object):
 
 # Test a basic GET call.
 
-def test_handle_connection():
+def test_index_html():
     conn = FakeConnection("GET / HTTP/1.0\r\n\r\n")
 
     expected_return = header + \
@@ -41,6 +41,7 @@ def test_handle_connection():
                       '<li><a href="./content">content</a></li>' + \
                       '<li><a href="./file">file</a></li>' + \
                       '<li><a href="./image">image</a></li>' + \
+                      '<li><a href="./form">form</a></li>' + \
                       '</ul>'
 
     server.handle_connection(conn)
@@ -68,8 +69,34 @@ def test_image_html():
     assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
 
 def test_handle_post():
-    conn = conn = FakeConnection("POST /image HTTP/1.0\r\n\r\n")
+    conn = FakeConnection("POST /image HTTP/1.0\r\n\r\n")
     expected_return = header + '<h1>this is a post method</h1>'
 
+    server.handle_connection(conn)
+    assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
+
+def test_handle_form():
+    conn = FakeConnection("GET /form HTTP/1.0\r\n\r\n")
+    expected_return = header + \
+                      '<h1>/form</h1>' + \
+                      "<form action='/submit' method='GET'>" + \
+                      "first name: <input type='text' name='firstname'></br>" + \
+                      "last name: <input type='text' name='lastname'><br>" + \
+                      "<input type='submit' value='Submitz'></br>" + \
+                      "</form>"
+    server.handle_connection(conn)
+    assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
+
+def test_handle_submit():
+    expected_return = header + '<p>Hello Mr. KangOne Suh.</p>'
+    # GET
+    conn = FakeConnection('GET /submit?firstname=KangOne&lastname=Suh ' +\
+                                  'HTTP/1.0\r\n\r\n')
+    server.handle_connection(conn)
+    assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
+
+    # POST
+    conn = FakeConnection('POST /submit HTTP/1.0\r\n\r\n' + \
+                          'firstname=KangOne&lastname=Suh')
     server.handle_connection(conn)
     assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
