@@ -32,7 +32,7 @@ class FakeConnection(object):
 
 # Test a basic GET call.
 
-def test_index_html():
+def test_handle_index():
     conn = FakeConnection("GET / HTTP/1.0\r\n\r\n")
 
     expected_return = header + \
@@ -47,21 +47,21 @@ def test_index_html():
     server.handle_connection(conn)
     assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
 
-def test_content_html():
+def test_handle_content():
     conn = FakeConnection("GET /content HTTP/1.0\r\n\r\n")
     expected_return = header + '<h1>/content</h1>'
 
     server.handle_connection(conn)
     assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
 
-def test_file_html():
+def test_handle_file():
     conn = FakeConnection("GET /file HTTP/1.0\r\n\r\n")
     expected_return = header + '<h1>/file</h1>'
 
     server.handle_connection(conn)
     assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
 
-def test_image_html():
+def test_handle_image():
     conn = FakeConnection("GET /image HTTP/1.0\r\n\r\n")
     expected_return = header + '<h1>/image</h1>'
 

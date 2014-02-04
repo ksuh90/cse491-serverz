@@ -12,7 +12,7 @@ header = 'HTTP/1.0 200 OK\r\n' + \
 
 def main():
    s = socket.socket()         # Create a socket object
-   host = socket.getfqdn() # Get local machine name
+   host = socket.getfqdn()     # Get local machine name
    port = random.randint(8000, 9999)
    s.bind((host, port))        # Bind to the port
 
@@ -45,15 +45,15 @@ def handle_connection(conn):
             handle_post(conn, '')
       else:
          if loc == '/':
-            index_html(conn, '')
+            handle_index(conn, '')
          elif loc == '/content':
-            content_html(conn, '')
+            handle_content(conn, '')
          elif loc == '/file':
-            file_html(conn, '')
+            handle_file(conn, '')
          elif loc == '/image':
-            image_html(conn, '')
+            handle_image(conn, '')
          elif loc == '/form':
-            form_html(conn, '')
+            handle_form(conn, '')
          elif loc == '/submit':
             handle_submit(conn, url[4])
 
@@ -69,7 +69,7 @@ def handle_post(conn, url):
    print 'this is a POST method!!'
    conn.send(header + '<h1>this is a post method</h1>')
 
-def index_html(conn, url):
+def handle_index(conn, url):
    conn.send(header + \
              '<h1>/home</h1>' + \
              '<ul>' + \
@@ -79,16 +79,16 @@ def index_html(conn, url):
              '<li><a href="./form">form</a></li>' + \
              '</ul>')
 
-def content_html(conn, url):
+def handle_content(conn, url):
    conn.send(header + '<h1>/content</h1>')
 
-def file_html(conn, url):
+def handle_file(conn, url):
    conn.send(header + '<h1>/file</h1>')
 
-def image_html(conn, url):
+def handle_image(conn, url):
    conn.send(header + '<h1>/image</h1>')
 
-def form_html(conn, url):
+def handle_form(conn, url):
    conn.send(header + '<h1>/form</h1>' + \
               "<form action='/submit' method='GET'>" + \
               "first name: <input type='text' name='firstname'></br>" + \
