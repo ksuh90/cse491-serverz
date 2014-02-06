@@ -2,100 +2,102 @@
 import random
 import socket
 import time
-import urlparse
+import jinja2
+import cgi
+from StringIO import StringIO
+from urlparse import urlparse, parse_qs
 
-# global header string
-header = 'HTTP/1.0 200 OK\r\n' + \
-         'Content-type: text/html\r\n' + \
-         '\r\n'
+# { path : html response }
+response = {
+            '/'        : 'index.html',
+            '/content' : 'content.html',
+            '/file'    : 'file.html',
+            '/image'   : 'image.html',
+            '/form'    : 'form.html',
+            '/submit'  : 'submit.html',
+           }
+
+def handle_connection(conn):
+  # initialize jinja2 variables
+  loader = jinja2.FileSystemLoader('./templates')
+  env = jinja2.Environment(loader=loader)
+
+  # recieve up to header
+  request = conn.recv(1)
+  while request[-4:] != '\r\n\r\n':
+    request += conn.recv(1)
+
+  # define request method, raw headers, path
+  first_line, headers = request.split('\r\n', 1)
+  first_line = first_line.split(' ')
+  method = first_line[0]
+  url = urlparse(first_line[1])
+  path = url[2]
+
+  # build a header dict
+  h = store_header(headers)
+
+  url_dict = parse_qs(url[4])
+  content = ''
+
+  if method == 'POST':
+    content = get_content(conn, h)
+
+  # cgi stuff
+  environ = {}
+  environ['REQUEST_METHOD'] = 'POST'
+  form = cgi.FieldStorage(fp=StringIO(content), headers=h, environ=environ)
+  url_dict.update(dict([(x, [form[x].value]) for x in form.keys()]))
+
+  if path in response:
+    template = env.get_template(response[path])
+    resp = 'HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n'
+  else:
+    template = env.get_template('404.html')
+    url_dict['path'] = path
+    resp = 'HTTP/1.0 404 Not Found\r\n\r\n'
+
+  resp += template.render(url_dict)
+  conn.send(resp)
+  conn.close()
+
+
+def store_header(raw_headers):
+  # map headers to a dict
+  h = {}
+  for line in raw_headers.split('\r\n')[:-2]:
+    k, v = line.split(': ', 1)
+    h[k.lower()] = v
+  return h
+
+
+def get_content(conn, headers):
+  # receive the content portion
+  content = ''
+  length = int(headers['content-length'])
+  while len(content) < length:
+    content += conn.recv(1)
+  return content
 
 
 def main():
-   s = socket.socket()         # Create a socket object
-   host = socket.getfqdn()     # Get local machine name
-   port = random.randint(8000, 9999)
-   s.bind((host, port))        # Bind to the port
+  s = socket.socket()         # Create a socket object
+  host = socket.getfqdn()     # Get pathal machine name
+  port = random.randint(8000, 9999)
+  s.bind((host, port))        # Bind to the port
 
-   print 'Starting server on', host, port
-   print 'The Web server URL for this would be http://%s:%d/' % (host, port)
+  print 'Starting server on', host, port
+  print 'The Web server URL for this would be http://%s:%d/' % (host, port)
 
-   s.listen(5)                 # Now wait for client connection.
+  s.listen(5)                 # Now wait for client connection.
 
-   print 'Entering infinite loop; hit CTRL-C to exit'
-   while True:
-      # Establish connection with client.    
-      c, (client_host, client_port) = s.accept()
-      print 'Got connection from', client_host, client_port
-      print
+  print 'Entering infinite loop; hit CTRL-C to exit'
+  while True:
+    # Establish connection with client.    
+    c, (client_host, client_port) = s.accept()
+    print 'Got connection from', client_host, client_port
+    print
+    handle_connection(c)
 
-      handle_connection(c)
-
-def handle_connection(conn):
-   request = (conn.recv(1000))
-
-   if len(request):
-      f_line = request.splitlines()[0].split(' ')
-      method = f_line[0]
-      url = urlparse.urlparse(f_line[1])
-      loc = url[2]
-      if method == 'POST':
-         if loc == '/submit':
-            handle_submit(conn, request.split('\r\n')[-1])
-         else:
-            handle_post(conn, '')
-      else:
-         if loc == '/':
-            handle_index(conn, '')
-         elif loc == '/content':
-            handle_content(conn, '')
-         elif loc == '/file':
-            handle_file(conn, '')
-         elif loc == '/image':
-            handle_image(conn, '')
-         elif loc == '/form':
-            handle_form(conn, '')
-         elif loc == '/submit':
-            handle_submit(conn, url[4])
-
-   conn.close()
-
-def handle_submit(conn, url):
-   q = url.split('&')
-   firstname = q[0].split('=')[1]
-   lastname = q[1].split('=')[1]
-   conn.send(header + "<p>Hello Mr. %s %s.</p>" % (firstname, lastname))
-
-def handle_post(conn, url):
-   print 'this is a POST method!!'
-   conn.send(header + '<h1>this is a post method</h1>')
-
-def handle_index(conn, url):
-   conn.send(header + \
-             '<h1>/home</h1>' + \
-             '<ul>' + \
-             '<li><a href="./content">content</a></li>' + \
-             '<li><a href="./file">file</a></li>' + \
-             '<li><a href="./image">image</a></li>' + \
-             '<li><a href="./form">form</a></li>' + \
-             '</ul>')
-
-def handle_content(conn, url):
-   conn.send(header + '<h1>/content</h1>')
-
-def handle_file(conn, url):
-   conn.send(header + '<h1>/file</h1>')
-
-def handle_image(conn, url):
-   conn.send(header + '<h1>/image</h1>')
-
-def handle_form(conn, url):
-   conn.send(header + '<h1>/form</h1>' + \
-              "<form action='/submit' method='GET'>" + \
-              "first name: <input type='text' name='firstname'></br>" + \
-              "last name: <input type='text' name='lastname'><br>" + \
-              "<input type='submit' value='Submitz'></br>" + \
-              "</form>")
-
-   
 if __name__ == '__main__':
-   main()
+  main()
