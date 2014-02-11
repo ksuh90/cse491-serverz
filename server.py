@@ -33,9 +33,14 @@ def submit(conn, firstname, lastname):
                                         lastname = lastname))
 
 def handle_connection(conn):
+
+    # the word 'receive' is mispelled
     recieve = conn.recv(1000)
     recieve = recieve.split('\n')
+
+    # 'con' and 'conn' is confusing
     con = recieve[-1]
+
     recieve = recieve[0].split()
     method = recieve[0]
     path = recieve[1]
