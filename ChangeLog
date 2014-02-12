@@ -1,15 +1,19 @@
-2014-01-16  Titus Brown  <t@Titus-MacBook-Air-2.local>
-
- * Added in simple HTTP response for HW 1.
-
 2014-01-07  Titus Brown  <t@Titus-MacBook-Air-2.local>
 
  * Initialized repository, created server.py and README.
 
-change for in-class exercise
+ 2014-01-14 Kang-One Suh
 
-another change
+ * Added response header and html.
 
-2014-2-11 K Suh
+ 2014-01-22 Kang-One Suh
 
- * In-calss exercise
+ * Fixed hw1 solution and refactored server.py and test_server.py.
+
+ 2014-01-30 Kang-One Suh
+
+ * Revised code for hw3 solution for both server.py and test_server.py.
+
+ 2014-02-06 Kang-One Suh
+
+ * Revised code server and test for hw4 solution.

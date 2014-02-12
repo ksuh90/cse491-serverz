@@ -25,107 +25,85 @@ class FakeConnection(object):
     def close(self):
         self.is_closed = True
 
-# Test a basic GET call.
+def status_code(conn):
+  return conn.sent[9:12]
 
-<<<<<<< HEAD
-def test_handle_connection_index():
-=======
-def test_handle_connection():
->>>>>>> e77f2fc738ef6ccc259923fb42d8deae606df1c3
+def test_handle_index():
     conn = FakeConnection("GET / HTTP/1.0\r\n\r\n")
-    expected_return = 'HTTP/1.0 200 OK\r\n' + \
-                      'Content-type: text/html\r\n' + \
-                      '\r\n' + \
-                      '<h1>Hello, world.</h1>' + \
-<<<<<<< HEAD
-                      '<p>This is foo\'s Web server.</p>' + \
-                      '<p><a href = "content">content</p>' + \
-                      '<p><a href = "file">file</p>' + \
-                      '<p><a href = "image">image</p>' \
-                      '<p><a href = "form">form</p>'
-=======
-                      'This is ctb\'s Web server.'
->>>>>>> e77f2fc738ef6ccc259923fb42d8deae606df1c3
-
     server.handle_connection(conn)
+    assert status_code(conn) == '200', 'Got: %s' % (repr(conn.sent),)
 
-    assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
-<<<<<<< HEAD
-
-def test_handle_connection_content():
+def test_handle_content():
     conn = FakeConnection("GET /content HTTP/1.0\r\n\r\n")
-    expected_return = 'HTTP/1.0 200 OK\r\n' + \
-                      'Content-type: text/html\r\n' + \
-                      '\r\n' + \
-                      '<h1>You have reached the content page</h1>'
-
     server.handle_connection(conn)
+    assert status_code(conn) == '200', 'Got: %s' % (repr(conn.sent),)
 
-    assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
-
-def test_handle_connection_file():
+def test_handle_file():
     conn = FakeConnection("GET /file HTTP/1.0\r\n\r\n")
-    expected_return = 'HTTP/1.0 200 OK\r\n' + \
-                      'Content-type: text/html\r\n' + \
-                      '\r\n' + \
-                      '<h1>You are currently visiting the file page</h1>'
-
     server.handle_connection(conn)
+    assert status_code(conn) == '200', 'Got: %s' % (repr(conn.sent),)
 
-    assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
-
-def test_handle_connection_image():
+def test_handle_image():
     conn = FakeConnection("GET /image HTTP/1.0\r\n\r\n")
-    expected_return = 'HTTP/1.0 200 OK\r\n' + \
-                      'Content-type: text/html\r\n' + \
-                      '\r\n' + \
-                      '<h1>You are looking at the image page</h1>'
+    server.handle_connection(conn)
+    assert status_code(conn) == '200', 'Got: %s' % (repr(conn.sent),)
+
+def test_404():
+    conn = FakeConnection("GET /foobar HTTP/1.0\r\n\r\n")
+    server.handle_connection(conn)
+    assert status_code(conn) == '404', 'Got: %s' % (repr(conn.sent),)
+
+def test_handle_submit():
+  firstname = "K"
+  lastname = "Suh"
+  conn = FakeConnection("GET /submit?firstname={0}&lastname={1} \
+                         HTTP/1.0\r\n\r\n".format(firstname, lastname))
+  server.handle_connection(conn)
+  assert status_code(conn) == '200', 'Got: %s' % (repr(conn.sent),)  
+
+
+def test_post_404():
+    conn = FakeConnection("POST /foobar HTTP/1.0\r\n" + \
+                          "Content-Length: 0\r\n" + \
+                          "Content-Type: application/x-www-form-urlencoded\r\n\r\n"
+                         )
+    server.handle_connection(conn)
+    assert status_code(conn) == '404', 'Got: %s' % (repr(conn.sent),)
+
+def test_submit_post_urlencoded():
+    firstname = "K"
+    lastname = "Suh"
+    conn = FakeConnection("POST /submit HTTP/1.0\r\n" + \
+                           "Content-Length: 24\r\n" + \
+                           "Content-Type: application/x-www-form-urlencoded\r\n\r\n" + \
+                           "firstname={0}&lastname={1}\r\n".format(firstname, lastname))
 
     server.handle_connection(conn)
 
-    assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
+    assert status_code(conn) == '200', 'Got: %s' % (repr(conn.sent),)
 
-def test_handle_connection_post():
-    conn = FakeConnection("POST / HTTP/1.0\r\n\r\n")
-    expected_return = 'HTTP/1.0 200 OK\r\n' + \
-                      'Content-type: text/html\r\n' + \
-                      '\r\n' + \
-                      '<h1>We recieved a POST request!</h1>'
-
-    server.handle_connection(conn)
-
-    assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
-
-def test_handle_connection_form():
-    conn = FakeConnection("GET /form HTTP/1.0\r\n\r\n")
-    expected_return = 'HTTP/1.0 200 OK\r\n' + \
-             'Content-type: text/html\r\n' + \
-              '\r\n' + \
-    '<form action="/submit" method="GET">' + \
-                  '<p>Firstname</p><input type="text" name="firstname">' + \
-      '<p>Lastname</p><input type="text" name="lastname">''<input type="submit" value="Submit">' + \
-    '</form>'
-
-    server.handle_connection(conn)
-
-def test_handle_connection_submit_get():
-    conn = FakeConnection("GET /submit?firstname=X&lastname=Y HTTP/1.0\r\n\r\n")
-    expected_return = 'HTTP/1.0 200 OK\r\n' + \
-                        'Content-type: text/html\r\n' + \
-                         '\r\n' + \
-                     '<h1>Hello Mr. X Y</h1>'
+def test_submit_post_multipart():
+    conn = FakeConnection("POST /submit HTTP/1.0\r\n" + \
+                          "Content-Length: 369\r\n" + \
+                          "Content-Type: multipart/form-data; " + \
+                          "boundary=32452685f36942178a5f36fd94e34b63\r\n\r\n" + \
+                          "--32452685f36942178a5f36fd94e34b63\r\n" + \
+                          "Content-Disposition: form-data; name=\"lastname\";" + \
+                          " filename=\"lastname\"\r\n\r\n" + \
+                          "K\r\n" + \
+                          "--32452685f36942178a5f36fd94e34b63\r\n" + \
+                          "Content-Disposition: form-data; name=\"firstname\";" + \
+                          " filename=\"firstname\"\r\n\r\n" + \
+                          "Suh\r\n" + \
+                          "--32452685f36942178a5f36fd94e34b63\r\n" + \
+                          "Content-Disposition: form-data; name=\"key\";" + \
+                          " filename=\"key\"\r\n\r\n" + \
+                          "value\r\n" + \
+                          "--32452685f36942178a5f36fd94e34b63--\r\n"
+                    )
+    firstname = 'K'
+    lastname = 'Suh'
 
     server.handle_connection(conn)
 
-def test_handle_connection_submit_post():
-    conn = FakeConnection("POST /submit HTTP/1.0" + \
-                          "Content-Type: application/x-www-form-urlencoded" + \
-                          "Content-Length: 30\r\n\r\n" + \
-                          "firstname=X&lastname=Y")
-    expected_return = expected_return = 'HTTP/1.0 200 OK\r\n' + \
-                                    'Content-type: text/html\r\n' + \
-                                    '\r\n' + \
-                                    '<h1>Hello Mr. X Y</h1>'
-    server.handle_connection(conn)
-=======
->>>>>>> e77f2fc738ef6ccc259923fb42d8deae606df1c3
+    assert status_code(conn) == '200', 'Got: %s' % (repr(conn.sent),)
