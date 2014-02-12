@@ -2,69 +2,102 @@
 import random
 import socket
 import time
+import jinja2
+import cgi
+from StringIO import StringIO
+from urlparse import urlparse, parse_qs
 
-def main():
-   s = socket.socket()         # Create a socket object
-   host = socket.getfqdn() # Get local machine name
-   port = random.randint(8000, 9999)
-   s.bind((host, port))        # Bind to the port
-
-   print 'Starting server on', host, port
-   print 'The Web server URL for this would be http://%s:%d/' % (host, port)
-
-   s.listen(5)                 # Now wait for client connection.
-
-   print 'Entering infinite loop; hit CTRL-C to exit'
-   while True:
-      # Establish connection with client.    
-      c, (client_host, client_port) = s.accept()
-      print 'Got connection from', client_host, client_port
-      print
-
-      handle_connection(c)
+# { path : html response }
+response = {
+            '/'        : 'index.html',
+            '/content' : 'content.html',
+            '/file'    : 'file.html',
+            '/image'   : 'image.html',
+            '/form'    : 'form.html',
+            '/submit'  : 'submit.html',
+           }
 
 def handle_connection(conn):
-   conn.send('HTTP/1.0 200 OK\r\n')
-   conn.send('Content-type: text/html\r\n')
-   conn.send('\r\n')
-   request = (conn.recv(1000)).split()
+  # initialize jinja2 variables
+  loader = jinja2.FileSystemLoader('./templates')
+  env = jinja2.Environment(loader=loader)
 
-   if len(request):
-      method = request[0]
-      loc = request[1]
-      if method == 'POST':
-         handle_post(conn)
-      else:
-         if loc == '/':
-            menu = '<h1>/home</h1>' + \
-                   '<ul>' + \
-                   '<li><a href="./content">content</a></li>' + \
-                   '<li><a href="./file">file</a></li>' + \
-                   '<li><a href="./image">image</a></li>' + \
-                   '</ul>'
-            conn.send(menu)
-         elif loc == '/content':
-            content_html(conn)
-         elif loc == '/file':
-            file_html(conn)
-         elif loc == '/image':
-            image_html(conn)
+  # recieve up to header
+  request = conn.recv(1)
+  while request[-4:] != '\r\n\r\n':
+    request += conn.recv(1)
 
-   conn.close()
+  # define request method, raw headers, path
+  first_line, headers = request.split('\r\n', 1)
+  first_line = first_line.split(' ')
+  method = first_line[0]
+  url = urlparse(first_line[1])
+  path = url[2]
 
-def handle_post(conn):
-   print 'this is a POST method!!'
-   conn.send('<h1>this is a post method</h1>')
+  # build a header dict
+  h = store_header(headers)
 
-def content_html(conn):
-   conn.send('<h1>/content</h1>')
+  url_dict = parse_qs(url[4])
+  content = ''
 
-def file_html(conn):
-   conn.send('<h1>/file</h1>')
+  if method == 'POST':
+    content = get_content(conn, h)
 
-def image_html(conn):
-   conn.send('<h1>/image</h1>')
+  # cgi stuff
+  environ = {}
+  environ['REQUEST_METHOD'] = 'POST'
+  form = cgi.FieldStorage(fp=StringIO(content), headers=h, environ=environ)
+  url_dict.update(dict([(x, [form[x].value]) for x in form.keys()]))
 
+  if path in response:
+    template = env.get_template(response[path])
+    resp = 'HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n'
+  else:
+    template = env.get_template('404.html')
+    url_dict['path'] = path
+    resp = 'HTTP/1.0 404 Not Found\r\n\r\n'
+
+  resp += template.render(url_dict)
+  conn.send(resp)
+  conn.close()
+
+
+def store_header(raw_headers):
+  # map headers to a dict
+  h = {}
+  for line in raw_headers.split('\r\n')[:-2]:
+    k, v = line.split(': ', 1)
+    h[k.lower()] = v
+  return h
+
+
+def get_content(conn, headers):
+  # receive the content portion
+  content = ''
+  length = int(headers['content-length'])
+  while len(content) < length:
+    content += conn.recv(1)
+  return content
+
+
+def main():
+  s = socket.socket()         # Create a socket object
+  host = socket.getfqdn()     # Get pathal machine name
+  port = random.randint(8000, 9999)
+  s.bind((host, port))        # Bind to the port
+
+  print 'Starting server on', host, port
+  print 'The Web server URL for this would be http://%s:%d/' % (host, port)
+
+  s.listen(5)                 # Now wait for client connection.
+
+  print 'Entering infinite loop; hit CTRL-C to exit'
+  while True:
+    # Establish connection with client.    
+    c, (client_host, client_port) = s.accept()
+    print 'Got connection from', client_host, client_port
+    print
+    handle_connection(c)
 
 if __name__ == '__main__':
-   main()
+  main()
