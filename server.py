@@ -8,7 +8,7 @@ from app import make_app
 
 
 def handle_connection(conn):
-  # environ dict to store everything
+  # a dict to store request data
   env = {}
 
   # recieve up to header
@@ -21,7 +21,7 @@ def handle_connection(conn):
   first_line = first_line.split(' ')
   method = first_line[0]
   url = urlparse(first_line[1])
-  path = url[2]
+  path = 'home' if (url[2] == '/') else url[2]
 
   # build a header dict
   h = store_header(headers)
@@ -33,9 +33,6 @@ def handle_connection(conn):
   env['CONTENT_TYPE'] = 'text/html'
   env['CONTENT_LENGTH'] = 0
 
-  #print env
-  #print
-
   def start_response(status, response_headers):
         conn.send('HTTP/1.0 ')
         conn.send(status)
@@ -45,11 +42,6 @@ def handle_connection(conn):
             conn.send(key + ': ' + header + '\r\n')
         conn.send('\r\n')
 
-
-
-
-
-  #url_dict = parse_qs(url[4])
   content = ''
   if method == 'POST':
     env['CONTENT_LENGTH'] = h['content-length']
@@ -64,9 +56,6 @@ def handle_connection(conn):
     conn.send(data)
 
   conn.close()
-
-
-
 
 
 def store_header(raw_headers):

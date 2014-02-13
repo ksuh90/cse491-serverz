@@ -46,7 +46,6 @@ def app(environ, start_response):
         args.update({x : form[x].value for x in form.keys()})
 
     args = {unicode(k, "utf-8") : unicode(v, "utf-8") for k,v in args.iteritems()}
-    print args
 
     start_response(status, response_headers)
     return [bytes(template.render(args))]
