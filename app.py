@@ -1,22 +1,56 @@
-# from http://docs.python.org/2/library/wsgiref.html
 
-from wsgiref.util import setup_testing_defaults
+import cgi
+import jinja2
+from urlparse import parse_qs
 
-# A relatively simple WSGI application. It's going to print out the
-# environment dictionary after being updated by setup_testing_defaults
-def simple_app(environ, start_response):
-    setup_testing_defaults(environ)
 
+# { path : html form }
+response = {
+            '/'        : 'index.html',
+            '/content' : 'content.html',
+            '/file'    : 'file.html',
+            '/image'   : 'image.html',
+            '/form'    : 'form.html',
+            '/submit'  : 'submit.html',
+           }
+
+
+def app(environ, start_response):
+    # initialize jinja2 variables
+    loader = jinja2.FileSystemLoader('./templates')
+    env = jinja2.Environment(loader=loader)
+
+    # initialize header values
     status = '200 OK'
-    headers = [('Content-type', 'text/plain')]
+    response_headers = [('Content-type', 'text/html')]
 
-    start_response(status, headers)
+    if environ['PATH_INFO'] in response:
+        template = env.get_template(response[environ['PATH_INFO']])
+    else:
+        status = '404 Not Found'
+        template = env.get_template('404.html')
 
-    ret = ["%s: %s\n" % (key, value)
-           for key, value in environ.iteritems()]
-    ret.insert(0, "This is your environ.  Hello, world!\n\n")
+    # setting up template params
+    x = parse_qs(environ['QUERY_STRING']).iteritems()
+    args = {k : v[0] for k,v in x}
+    args['path'] = environ['PATH_INFO']
 
-    return ret
+    # handle POST method
+    if environ['REQUEST_METHOD'] == 'POST':
+        headers = {k[5:].lower().replace('_','-') : v \
+                    for k,v in environ.iteritems() if(k.startswith('HTTP'))}
+        headers['content-type'] = environ['CONTENT_TYPE']
+        headers['content-length'] = environ['CONTENT_LENGTH']
+        form = cgi.FieldStorage(fp=environ['wsgi.input'], \
+                                headers=headers, environ=environ)
+        args.update({x : form[x].value for x in form.keys()})
+
+    args = {unicode(k, "utf-8") : unicode(v, "utf-8") for k,v in args.iteritems()}
+    print args
+
+    start_response(status, response_headers)
+    return [bytes(template.render(args))]
+
 
 def make_app():
-    return simple_app
+    return app

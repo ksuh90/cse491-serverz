@@ -2,25 +2,14 @@
 import random
 import socket
 import time
-import jinja2
-import cgi
 from StringIO import StringIO
 from urlparse import urlparse, parse_qs
+from app import make_app
 
-# { path : html response }
-response = {
-            '/'        : 'index.html',
-            '/content' : 'content.html',
-            '/file'    : 'file.html',
-            '/image'   : 'image.html',
-            '/form'    : 'form.html',
-            '/submit'  : 'submit.html',
-           }
 
 def handle_connection(conn):
-  # initialize jinja2 variables
-  loader = jinja2.FileSystemLoader('./templates')
-  env = jinja2.Environment(loader=loader)
+  # environ dict to store everything
+  env = {}
 
   # recieve up to header
   request = conn.recv(1)
@@ -37,29 +26,47 @@ def handle_connection(conn):
   # build a header dict
   h = store_header(headers)
 
-  url_dict = parse_qs(url[4])
-  content = ''
+  path = urlparse(request.split(' ', 3)[1])
+  env['REQUEST_METHOD'] = method
+  env['PATH_INFO'] = path[2]
+  env['QUERY_STRING'] = path[4]
+  env['CONTENT_TYPE'] = 'text/html'
+  env['CONTENT_LENGTH'] = 0
 
+  #print env
+  #print
+
+  def start_response(status, response_headers):
+        conn.send('HTTP/1.0 ')
+        conn.send(status)
+        conn.send('\r\n')
+        for pair in response_headers:
+            key, header = pair
+            conn.send(key + ': ' + header + '\r\n')
+        conn.send('\r\n')
+
+
+
+
+
+  #url_dict = parse_qs(url[4])
+  content = ''
   if method == 'POST':
+    env['CONTENT_LENGTH'] = h['content-length']
+    env['CONTENT_TYPE'] = h['content-type']
     content = get_content(conn, h)
 
-  # cgi stuff
-  environ = {}
-  environ['REQUEST_METHOD'] = 'POST'
-  form = cgi.FieldStorage(fp=StringIO(content), headers=h, environ=environ)
-  url_dict.update(dict([(x, [form[x].value]) for x in form.keys()]))
 
-  if path in response:
-    template = env.get_template(response[path])
-    resp = 'HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n'
-  else:
-    template = env.get_template('404.html')
-    url_dict['path'] = path
-    resp = 'HTTP/1.0 404 Not Found\r\n\r\n'
+  env['wsgi.input'] = StringIO(content)
+  ze_app = make_app()
+  r = ze_app(env, start_response)
+  for data in r:
+    conn.send(data)
 
-  resp += template.render(url_dict)
-  conn.send(resp)
   conn.close()
+
+
+
 
 
 def store_header(raw_headers):
