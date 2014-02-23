@@ -6,6 +6,22 @@ from StringIO import StringIO
 from urlparse import urlparse, parse_qs
 from app import make_app
 
+import quixote
+from quixote.demo import create_publisher
+from wsgiref.validate import validator
+from wsgiref.simple_server import make_server
+
+_the_app = None
+
+def make_app():
+  global _the_app
+
+  if _the_app is None:
+    p = create_publisher()
+    _the_app = quixote.get_wsgi_app()
+
+  return _the_app
+
 
 def handle_connection(conn):
   # a dict to store request data
@@ -32,6 +48,7 @@ def handle_connection(conn):
   env['QUERY_STRING'] = path[4]
   env['CONTENT_TYPE'] = 'text/html'
   env['CONTENT_LENGTH'] = 0
+  env['SCRIPT_NAME'] = ''
 
   def start_response(status, response_headers):
         conn.send('HTTP/1.0 ')
