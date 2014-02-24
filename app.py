@@ -50,12 +50,12 @@ def app(environ, start_response):
 
     args = {unicode(k, "utf-8") : unicode(v, "utf-8") for k,v in args.iteritems()}
     
-    
-
-
     start_response(status, response_headers)
+
+    # retun the image when '/image'
     if args['path'] == '/image':
         return handle_image()
+
     return [bytes(template.render(args))]
 
 
