@@ -8,11 +8,15 @@ from app import make_app
 
 import quixote
 from quixote.demo import create_publisher
+#from quixote.demo.mini_demo import create_publisher
+#from quixote.demo.altdemo import create_publisher
 from wsgiref.validate import validator
 from wsgiref.simple_server import make_server
 
 _the_app = None
 
+# to run quixote
+'''
 def make_app():
   global _the_app
 
@@ -21,6 +25,7 @@ def make_app():
     _the_app = quixote.get_wsgi_app()
 
   return _the_app
+'''
 
 
 def handle_connection(conn):
@@ -32,11 +37,15 @@ def handle_connection(conn):
   while request[-4:] != '\r\n\r\n':
     request += conn.recv(1)
 
-  # define request method, raw headers, path
+  
   first_line, headers = request.split('\r\n', 1)
   first_line = first_line.split(' ')
+
+  # allocate request method, raw headers, path, scheme...
   method = first_line[0]
   url = urlparse(first_line[1])
+  protocol = first_line[2]
+  url_scheme = first_line[2].split('/')[0]
   path = 'home' if (url[2] == '/') else url[2]
 
   # build a header dict
@@ -47,8 +56,18 @@ def handle_connection(conn):
   env['PATH_INFO'] = path[2]
   env['QUERY_STRING'] = path[4]
   env['CONTENT_TYPE'] = 'text/html'
-  env['CONTENT_LENGTH'] = 0
+  env['CONTENT_LENGTH'] = '0'
   env['SCRIPT_NAME'] = ''
+  env['SERVER_NAME'] = ''
+  env['SERVER_PORT'] = ''
+  env['SERVER_PROTOCOL'] = protocol
+  env['wsgi.version'] = (1, 0)
+  env['wsgi.errors'] = StringIO()
+  env['wsgi.multithread'] = ''
+  env['wsgi.multiprocess'] = ''
+  env['wsgi.run_once'] = ''
+  env['wsgi.url_scheme'] = url_scheme.lower()
+
 
   def start_response(status, response_headers):
         conn.send('HTTP/1.0 ')
@@ -67,8 +86,14 @@ def handle_connection(conn):
 
 
   env['wsgi.input'] = StringIO(content)
+
   ze_app = make_app()
   r = ze_app(env, start_response)
+
+  # validator
+  # validator_app = validator(ze_app)
+  # r = validator_app(env, start_response)
+
   for data in r:
     conn.send(data)
 
@@ -81,6 +106,7 @@ def store_header(raw_headers):
   for line in raw_headers.split('\r\n')[:-2]:
     k, v = line.split(': ', 1)
     h[k.lower()] = v
+
   return h
 
 
