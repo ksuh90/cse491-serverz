@@ -94,7 +94,7 @@ def handle_connection(conn):
   while True:
         line = buf.readline()
         if line == '\r\n' or line == '':
-            break # empty line = end of headers section
+            break # end of header
         if ': ' in line:
             key, value = line.strip('\r\n').split(": ",1)
             key = key.upper().replace('-','_')
