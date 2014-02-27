@@ -13,19 +13,27 @@ from quixote.demo import create_publisher
 from wsgiref.validate import validator
 from wsgiref.simple_server import make_server
 
+
+# import the imageapp
+import imageapp
+imageapp.setup()
+
+
+
 _the_app = None
 
 # to run quixote
-'''
+
 def make_app():
   global _the_app
 
   if _the_app is None:
-    p = create_publisher()
+    #p = create_publisher()
+    p = imageapp.create_publisher()
     _the_app = quixote.get_wsgi_app()
 
   return _the_app
-'''
+
 
 
 def handle_connection(conn):
