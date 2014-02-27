@@ -1,4 +1,3 @@
-
 import cgi
 import jinja2
 from urlparse import parse_qs
@@ -56,11 +55,21 @@ def app(environ, start_response):
     if args['path'] == '/image':
         return handle_image()
 
+    if args['path'] == '/file':
+        return handle_text_file()
+
     return [bytes(template.render(args))]
 
 
 def handle_image():
     fp = open('./img/sparty.jpg', 'rb')
+    data = fp.read()
+    fp.close()
+    return data
+
+
+def handle_text_file():
+    fp = open('./files/text.txt', 'rb')
     data = fp.read()
     fp.close()
     return data
