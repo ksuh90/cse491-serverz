@@ -27,6 +27,24 @@ def make_app():
   return _the_app
 '''
 
+def get_content(conn, headers):
+  # receive the content portion
+  content = ''
+  length = int(headers['content-length'])
+  while len(content) < length:
+    content += conn.recv(1)
+  return content
+
+
+def store_header(raw_headers):
+  # map headers to a dict
+  h = {}
+  for line in raw_headers.split('\r\n')[:-2]:
+    k, v = line.split(': ', 1)
+    h[k.lower()] = v
+
+  return h
+
 
 def handle_connection(conn):
   # a dict to store request data
@@ -68,7 +86,6 @@ def handle_connection(conn):
   env['wsgi.run_once'] = ''
   env['wsgi.url_scheme'] = url_scheme.lower()
 
-
   def start_response(status, response_headers):
         conn.send('HTTP/1.0 ')
         conn.send(status)
@@ -98,25 +115,6 @@ def handle_connection(conn):
     conn.send(data)
 
   conn.close()
-
-
-def store_header(raw_headers):
-  # map headers to a dict
-  h = {}
-  for line in raw_headers.split('\r\n')[:-2]:
-    k, v = line.split(': ', 1)
-    h[k.lower()] = v
-
-  return h
-
-
-def get_content(conn, headers):
-  # receive the content portion
-  content = ''
-  length = int(headers['content-length'])
-  while len(content) < length:
-    content += conn.recv(1)
-  return content
 
 
 def main():
