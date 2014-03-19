@@ -9,44 +9,34 @@ from app import make_app
 import quixote
 from quixote.demo import create_publisher
 #from quixote.demo.mini_demo import create_publisher
-#from quixote.demo.altdemo import create_publisher
-from wsgiref.validate import validator
+from quixote.demo.altdemo import create_publisher
+#from wsgiref.validate import validator
 from wsgiref.simple_server import make_server
+
+
+# import the imageapp
+import imageapp
+imageapp.setup()
+
+
 
 _the_app = None
 
 # to run quixote
-'''
+
 def make_app():
   global _the_app
 
   if _the_app is None:
-    p = create_publisher()
+    #p = create_publisher()
+    p = imageapp.create_publisher()
     _the_app = quixote.get_wsgi_app()
 
   return _the_app
-'''
-
-def get_content(conn, headers):
-  # receive the content portion
-  content = ''
-  length = int(headers['content-length'])
-  while len(content) < length:
-    content += conn.recv(1)
-  return content
 
 
-def store_header(raw_headers):
-  # map headers to a dict
-  h = {}
-  for line in raw_headers.split('\r\n')[:-2]:
-    k, v = line.split(': ', 1)
-    h[k.lower()] = v
 
-  return h
-
-
-def handle_connection(conn):
+def handle_connection(conn, host, port):
   # a dict to store request data
   env = {}
 
@@ -70,21 +60,40 @@ def handle_connection(conn):
   h = store_header(headers)
 
   path = urlparse(request.split(' ', 3)[1])
+
+  # pre-construct env
   env['REQUEST_METHOD'] = method
   env['PATH_INFO'] = path[2]
   env['QUERY_STRING'] = path[4]
   env['CONTENT_TYPE'] = 'text/html'
   env['CONTENT_LENGTH'] = '0'
   env['SCRIPT_NAME'] = ''
-  env['SERVER_NAME'] = ''
-  env['SERVER_PORT'] = ''
+  env['SERVER_NAME'] = host
+  env['SERVER_PORT'] = str(port)
   env['SERVER_PROTOCOL'] = protocol
   env['wsgi.version'] = (1, 0)
   env['wsgi.errors'] = StringIO()
-  env['wsgi.multithread'] = ''
-  env['wsgi.multiprocess'] = ''
-  env['wsgi.run_once'] = ''
+  env['wsgi.multithread'] = False
+  env['wsgi.multiprocess'] = False
+  env['wsgi.run_once'] = False
   env['wsgi.url_scheme'] = url_scheme.lower()
+
+  # contruct env
+  buf = StringIO(request)
+  buf.readline()
+  while True:
+        line = buf.readline()
+        if line == '\r\n' or line == '':
+            break # empty line = end of headers section
+        if ': ' in line:
+            key, value = line.strip('\r\n').split(": ",1)
+            key = key.upper().replace('-','_')
+            env[key] = value
+
+
+  if 'COOKIE' in env.keys():
+    env['HTTP_COOKIE'] = env['COOKIE']
+
 
   def start_response(status, response_headers):
         conn.send('HTTP/1.0 ')
@@ -117,6 +126,25 @@ def handle_connection(conn):
   conn.close()
 
 
+def store_header(raw_headers):
+  # map headers to a dict
+  h = {}
+  for line in raw_headers.split('\r\n')[:-2]:
+    k, v = line.split(': ', 1)
+    h[k.lower()] = v
+
+  return h
+
+
+def get_content(conn, headers):
+  # receive the content portion
+  content = ''
+  length = int(headers['content-length'])
+  while len(content) < length:
+    content += conn.recv(1)
+  return content
+
+
 def main():
   s = socket.socket()         # Create a socket object
   host = socket.getfqdn()     # Get pathal machine name
@@ -134,7 +162,7 @@ def main():
     c, (client_host, client_port) = s.accept()
     print 'Got connection from', client_host, client_port
     print
-    handle_connection(c)
+    handle_connection(c, host, port)
 
 if __name__ == '__main__':
   main()
