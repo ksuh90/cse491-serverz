@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import argparse
 import random
 import socket
 import time
@@ -8,7 +9,7 @@ from app import make_app
 
 import quixote
 from quixote.demo import create_publisher
-#from quixote.demo.mini_demo import create_publisher
+from quixote.demo.mini_demo import create_publisher
 from quixote.demo.altdemo import create_publisher
 #from wsgiref.validate import validator
 from wsgiref.simple_server import make_server
@@ -24,19 +25,22 @@ _the_app = None
 
 # to run quixote
 
-def make_app():
+def make_app(app_type):
+
   global _the_app
 
   if _the_app is None:
-    #p = create_publisher()
-    p = imageapp.create_publisher()
+    if app_type == 'altdemo':
+      p = create_publisher()
+    else:
+      p = imageapp.create_publisher()
     _the_app = quixote.get_wsgi_app()
 
   return _the_app
 
 
 
-def handle_connection(conn, host, port):
+def handle_connection(conn, host, port, app_type):
   # a dict to store request data
   env = {}
 
@@ -113,7 +117,8 @@ def handle_connection(conn, host, port):
 
   env['wsgi.input'] = StringIO(content)
 
-  ze_app = make_app()
+  #if make_app == ''
+  ze_app = make_app(app_type)
   r = ze_app(env, start_response)
 
   # validator
@@ -145,10 +150,43 @@ def get_content(conn, headers):
   return content
 
 
+def get_args():
+  app_list = ['altdemo', 'image', 'myapp']
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-A', action = "store",
+                            dest = 'arg_app',
+                            help = "The application to run")
+  parser.add_argument('-p', action = "store",
+                            default = 0,
+                            dest = 'arg_port',
+                            help = "The port to use (optional)",
+                            required = False,
+                            type = int)
+  result = parser.parse_args()
+  if result.arg_app not in app_list:
+      print '\nError, that application does not exist\n'
+      exit()
+  return result.arg_app, result.arg_port
+
+
 def main():
+
+  app, port = get_args()
+ 
+
+  app_type = ''
+  if app == 'image':
+    app_type == 'image'
+  elif app == 'altdemo':
+    app_type = 'altdemo'
+  elif app == 'myapp':
+    app_type = 'myapp'
+
+
   s = socket.socket()         # Create a socket object
   host = socket.getfqdn()     # Get pathal machine name
-  port = random.randint(8000, 9999)
+  if (port == 0):
+    port = random.randint(8000, 9999)
   s.bind((host, port))        # Bind to the port
 
   print 'Starting server on', host, port
@@ -157,12 +195,17 @@ def main():
   s.listen(5)                 # Now wait for client connection.
 
   print 'Entering infinite loop; hit CTRL-C to exit'
+
+
+
   while True:
     # Establish connection with client.    
     c, (client_host, client_port) = s.accept()
     print 'Got connection from', client_host, client_port
     print
-    handle_connection(c, host, port)
 
+
+    handle_connection(c, host, port, app_type)
+  
 if __name__ == '__main__':
   main()
