@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<a href='upload'>Upload an image</a> |
+<a href='image'>Show most recent image</a>
+<p>
+<img width=40% src='image_raw?special=latest'/>
+
+
+
+
+
+</br> 
+
+
+
+<script type="text/javascript">
+
+function onPost() {
+	
+	var table = document.getElementById("comment_table");
+	var row = table.insertRow(0);
+	var cellName = row.insertCell(0);
+	var cellBody = row.insertCell(1);
+
+	cellName.innerHTML = $("#name")[0].value;
+	cellBody.innerHTML = $("#body")[0].value;
+
+	$("#name")[0].value = "";
+	$("#body")[0].value = "";
+
+
+	/*$.ajax({
+	   type: "POST",
+	   url: "/comment_process.py",
+	   data: { name : $("#name").value, body : $("body").value },
+	   success: function(response) {
+	       
+	   }
+	   
+	});*/
+
+}
+
+</script>
+
+
+
+<h1>Comments</h1>
+<form id="comment_form" method="POST" onsubmit="return false;">
+	<input id="name" type="text" placeholder="Your name"></input>
+	</br>
+	<textarea id="body" type="text" style="width:30%;" placeholder="Enter comment"></textarea>
+	</br>
+	<button id="comment_btn" type="submit" onclick="onPost()">post</button>
+</form>
+</br>
+<table id="comment_table">
+</table>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+{% endblock %}
