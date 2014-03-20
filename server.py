@@ -5,7 +5,7 @@ import socket
 import time
 from StringIO import StringIO
 from urlparse import urlparse, parse_qs
-from app import make_app
+from app import make_my_app
 
 import quixote
 from quixote.demo import create_publisher
@@ -118,7 +118,11 @@ def handle_connection(conn, host, port, app_type):
   env['wsgi.input'] = StringIO(content)
 
   #if make_app == ''
-  ze_app = make_app(app_type)
+  if app_type == 'myapp':
+    ze_app = make_my_app()
+  else:
+    ze_app = make_app(app_type)
+
   r = ze_app(env, start_response)
 
   # validator
@@ -173,7 +177,6 @@ def main():
 
   app, port = get_args()
  
-
   app_type = ''
   if app == 'image':
     app_type == 'image'
@@ -181,6 +184,7 @@ def main():
     app_type = 'altdemo'
   elif app == 'myapp':
     app_type = 'myapp'
+
 
 
   s = socket.socket()         # Create a socket object
@@ -195,7 +199,6 @@ def main():
   s.listen(5)                 # Now wait for client connection.
 
   print 'Entering infinite loop; hit CTRL-C to exit'
-
 
 
   while True:

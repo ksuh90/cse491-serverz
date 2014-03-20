@@ -1,10 +1,9 @@
-
 import cgi
 import jinja2
 from urlparse import parse_qs
 
 
-# { path : html form }
+# { path : html tpl }
 response = {
             '/'        : 'index.html',
             '/content' : 'content.html',
@@ -22,10 +21,13 @@ def app(environ, start_response):
 
     # initialize header values
     status = '200 OK'
+
     response_headers = [('Content-type', 'text/html')]
 
     if environ['PATH_INFO'] in response:
         template = env.get_template(response[environ['PATH_INFO']])
+        if environ['PATH_INFO'] == '/image':
+            response_headers = [('Content-type', 'image/jpg')]
     else:
         status = '404 Not Found'
         template = env.get_template('404.html')
@@ -46,10 +48,34 @@ def app(environ, start_response):
         args.update({x : form[x].value for x in form.keys()})
 
     args = {unicode(k, "utf-8") : unicode(v, "utf-8") for k,v in args.iteritems()}
-
+    
     start_response(status, response_headers)
+
+    # retun the image when '/image'
+    if args['path'] == '/image':
+        return handle_image()
+
+
+    # retun the text file when '/file'
+    if args['path'] == '/file':
+        return handle_text_file()
+
     return [bytes(template.render(args))]
 
 
-def make_app():
+def handle_image():
+    fp = open('./img/sparty.jpg', 'rb')
+    data = fp.read()
+    fp.close()
+    return data
+
+
+def handle_text_file():
+    fp = open('./files/text.txt', 'rb')
+    data = fp.read()
+    fp.close()
+    return data
+
+
+def make_my_app():
     return app
