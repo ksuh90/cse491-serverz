@@ -1,0 +1,23 @@
+go /
+code 200
+find "/home"
+
+go /content
+code 200
+find "/content"
+
+go /file
+code 200
+find "Lorem ipsum dolor sit amet"
+
+go /image
+code 200
+
+
+
+go /form
+code 200
+formvalue 1 firstname K
+formvalue 1 lastname Suh
+submit
+find "Hi, K Suh."
