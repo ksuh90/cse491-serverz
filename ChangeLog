@@ -25,3 +25,11 @@
  2014-02-23 Kang-One Suh
 
  * Revised for hw6
+
+ 2014-03-20 Kang-One Suh
+
+ * Revised for hw8. Commenting feature in imageapp index page. User inputs name
+ * and comment in the form and hits 'post'. Javascript handles the input of
+ * comments to the comment table DOM. Tried to upload the comments through a
+ * python script to Couch db, but was not able to perform a 'post' method to a
+ * python file using ajax. 
