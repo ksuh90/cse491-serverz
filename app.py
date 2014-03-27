@@ -1,3 +1,4 @@
+import os
 import cgi
 import jinja2
 from urlparse import parse_qs
@@ -11,6 +12,7 @@ response = {
             '/image'   : 'image.html',
             '/form'    : 'form.html',
             '/submit'  : 'submit.html',
+            '/thumbnails' : 'thumbnails.html'
            }
 
 
@@ -21,7 +23,6 @@ def app(environ, start_response):
 
     # initialize header values
     status = '200 OK'
-
     response_headers = [('Content-type', 'text/html')]
 
     if environ['PATH_INFO'] in response:
@@ -51,23 +52,38 @@ def app(environ, start_response):
     
     start_response(status, response_headers)
 
-    # retun the image when '/image'
+    # return the image on '/image'
     if args['path'] == '/image':
-        return handle_image()
+        path = './img/sparty.jpg'
+        return get_image(path)
 
 
-    # retun the text file when '/file'
+    # retun the text file on '/file'
     if args['path'] == '/file':
         return handle_text_file()
+
+    if args['path'] == '/thumbnails':
+        args = dict(names=get_contents('img'))
+
+    if environ['PATH_INFO'][:5] == '/pics':
+        return get_pics(environ['PATH_INFO'][5:])
+    #print args['path']
+        
+
+   #print environ['PATH_INFO']
+
 
     return [bytes(template.render(args))]
 
 
-def handle_image():
-    fp = open('./img/sparty.jpg', 'rb')
+def get_image(path):
+    fp = open(path, 'rb')
     data = fp.read()
     fp.close()
     return data
+
+def get_pics(path):
+    return get_image('./img/' + path)
 
 
 def handle_text_file():
@@ -75,6 +91,12 @@ def handle_text_file():
     data = fp.read()
     fp.close()
     return data
+
+def get_contents(dir):
+    contents = []
+    for file in sorted(os.listdir(dir)):
+        contents.append(file)
+    return contents
 
 
 def make_my_app():
