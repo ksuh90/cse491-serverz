@@ -29,6 +29,14 @@ $(document).ready(function() {
      // update timestamp value from XML
      timestamp = $("time", xml).text();
 
+     var dt = new Date(timestamp * 1000);
+
+     var hours = dt.getHours().toString();
+     var minutes = dt.getMinutes().toString();
+     var seconds = dt.getSeconds().toString();
+
+     var timestamp_f = hours + ":" + minutes + ":" + seconds;
+
      // for each 'message' block in the XML, retrieve author & content, then
      // post.
 
@@ -38,8 +46,7 @@ $(document).ready(function() {
         author = $("author", message).text();
         content = $("text", message).text();
 
-        $("#messagewindow").prepend("<b>" + author + "</b>:" + content 
-                                    + "<br>");
+        $("#messagewindow").prepend("<b>(" + timestamp_f + ")</b> " + author + "</b> : " + content + "<br>");
      });
   };
 
