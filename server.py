@@ -15,6 +15,10 @@ from quixote.demo.altdemo import create_publisher
 from wsgiref.simple_server import make_server
 
 
+# import quotes
+import quotes
+
+
 # import the imageapp
 import imageapp
 imageapp.setup()
@@ -120,6 +124,9 @@ def handle_connection(conn, host, port, app_type):
   #if make_app == ''
   if app_type == 'myapp':
     ze_app = make_my_app()
+  elif app_type == 'quotes':
+    quotes_dir = './quotes/'
+    ze_app = quotes.make_quotes_app(quotes_dir + 'quotes.txt', quotes_dir + 'html')
   else:
     ze_app = make_app(app_type)
 
@@ -155,7 +162,7 @@ def get_content(conn, headers):
 
 
 def get_args():
-  app_list = ['altdemo', 'image', 'myapp']
+  app_list = ['altdemo', 'image', 'myapp', 'quotes', 'chat']
   parser = argparse.ArgumentParser()
   parser.add_argument('-A', action = "store",
                             dest = 'arg_app',
@@ -177,6 +184,7 @@ def main():
 
   app, port = get_args()
  
+  '''
   app_type = ''
   if app == 'image':
     app_type == 'image'
@@ -184,6 +192,7 @@ def main():
     app_type = 'altdemo'
   elif app == 'myapp':
     app_type = 'myapp'
+  '''
 
 
 
@@ -208,7 +217,7 @@ def main():
     print
 
 
-    handle_connection(c, host, port, app_type)
+    handle_connection(c, host, port, app)
   
 if __name__ == '__main__':
   main()
