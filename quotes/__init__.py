@@ -1,4 +1,4 @@
 from apps import *
 
-def make_quotes_app(file, path):
-    return QuotesApp(quotes_file, files_path)
+def make_quotes_app(quotes_file, path):
+    return QuotesApp(quotes_file, path)

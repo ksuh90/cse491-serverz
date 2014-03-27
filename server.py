@@ -14,10 +14,11 @@ from quixote.demo.altdemo import create_publisher
 #from wsgiref.validate import validator
 from wsgiref.simple_server import make_server
 
-
-# import quotes
+# quotes
 import quotes
 
+# chat
+import chat
 
 # import the imageapp
 import imageapp
@@ -124,9 +125,12 @@ def handle_connection(conn, host, port, app_type):
   #if make_app == ''
   if app_type == 'myapp':
     ze_app = make_my_app()
+
   elif app_type == 'quotes':
     quotes_dir = './quotes/'
     ze_app = quotes.make_quotes_app(quotes_dir + 'quotes.txt', quotes_dir + 'html')
+  elif app_type == 'chat':
+    ze_app = chat.make_chat_app('./chat/html')
   else:
     ze_app = make_app(app_type)
 
