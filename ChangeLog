@@ -33,3 +33,9 @@
  * comments to the comment table DOM. Tried to upload the comments through a
  * python script to Couch db, but was not able to perform a 'post' method to a
  * python file using ajax. 
+
+ 2014-03-27 Kang-One Suh
+ * Revised for hw9. Added thumbnail feature in myapp. Updated app.py to render
+ * all images in img directory when accessing /thumbnails from index page. Added
+ * more sample images.
+ * Integrated quotes and chat apps.
