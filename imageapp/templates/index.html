@@ -4,13 +4,16 @@
 <a href='upload'>Upload an image</a> |
 <a href='image'>Show most recent image</a>
 <p>
-<img width=40% src='image_raw?special=latest'/>
-
-
 
 </br> 
 
+<a href='list_of_images'>All images</a>
 
+</br>
+
+<img width=40% src='image_raw'/>
+
+</br>
 
 <script type="text/javascript">
 
@@ -31,7 +34,7 @@ function onPost() {
 	/*$.ajax({
 	   type: "post",
 	   dataType: 'jsonp',
-	   url: "http://cse.msu.edu/~suhkang/comment_process.php",
+	   url: "comment_process.php",
 	   data: JSON.stringify({ name : $("#name").value, body : $("body").value }),
 	   success: function(response) {
 
@@ -40,13 +43,17 @@ function onPost() {
 	   }
 	   
 	});*/
-	var post_obj = {'foo' : 'bar'};
-	$.post("comment_process.php", post_obj, function(result) {
+	/*var post_obj = { 
+		name : $("#name").value, 
+		body : $("body").value 
+	};
+
+	$.post('/comment_process', post_obj, function(result) {
 		console.log(result);
-		console.log('hello world!!');    // TODO : remove this ln
+		console.log('hello world!!');
 
 
-	});
+	});*/
 
 }
 
@@ -67,5 +74,5 @@ function onPost() {
 </table>
 
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 {% endblock %}

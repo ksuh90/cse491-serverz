@@ -3,6 +3,26 @@
 {% block content %}
 Here is your image:
 <p>
-<img width=40% src='image_raw?special=latest'/>
+<!-- <img width=40% src='image_raw?special=latest'/> -->
+<div id="image_container"></div>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script type="text/javascript">
+var image_num = window.location.href.split("?imageNum=")[1]
+
+image_html = ''
+
+if($.isNumeric(image_num)) {
+    image_html = "<img width=40% src='image_raw?num=" + image_num + "' />"
+} else {
+    // Just show the latest if they're a jerk and used a non numeric value
+    image_html = "<img width=40% src='image_raw?special=latest'/>"
+}
+
+
+
+$("#image_container").append(image_html)
+</script>
 
 {% endblock %}
