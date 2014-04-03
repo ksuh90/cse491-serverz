@@ -15,7 +15,7 @@ def create_publisher():
 
 def setup():                            # stuff that should be run once.
     html.init_templates()
-
+    
     for file in os.listdir('imageapp'):
         if file.endswith(".png"):
             img_data = open('imageapp/'+file).read()

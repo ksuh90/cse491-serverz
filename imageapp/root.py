@@ -35,6 +35,14 @@ class RootDirectory(Directory):
     @export(name='image_raw')
     def image_raw(self):
         response = quixote.get_response()
-        response.set_content_type('image/png')
         img = image.get_latest_image()
+        if img[0].split('.')[-1].lower() in ('jpg', 'jpeg'):
+            response.set_content_type('image/jpeg')
+
+        elif img[0].split('.')[-1].lower() in ('tif',' tiff'):
+            response.set_content_type('image/tiff')
+
+        else:
+            response.set_content_type('image/png')
+
         return img

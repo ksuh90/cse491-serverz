@@ -29,14 +29,24 @@ function onPost() {
 
 
 	/*$.ajax({
-	   type: "POST",
-	   url: "/comment_process.py",
-	   data: { name : $("#name").value, body : $("body").value },
+	   type: "post",
+	   dataType: 'jsonp',
+	   url: "http://cse.msu.edu/~suhkang/comment_process.php",
+	   data: JSON.stringify({ name : $("#name").value, body : $("body").value }),
 	   success: function(response) {
+
+	   		console.log(response);
 	       
 	   }
 	   
 	});*/
+	var post_obj = {'foo' : 'bar'};
+	$.post("comment_process.php", post_obj, function(result) {
+		console.log(result);
+		console.log('hello world!!');    // TODO : remove this ln
+
+
+	});
 
 }
 
