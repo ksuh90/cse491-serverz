@@ -44,3 +44,5 @@
 
  * Changed imageapp to support JPEG and TIFF.
  * Revised root.py to handle jpeg and tiff extensions.
+ * Added url handler for images in image app. Refined image.py, root.py,
+ * index.html, image.html to link images via url GET.
