@@ -22,3 +22,6 @@ def init_templates():
 def render(template_name, values={}):
     template = env.get_template(template_name)
     return template.render(values)
+
+
+

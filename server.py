@@ -115,9 +115,20 @@ def handle_connection(conn, host, port, app_type):
 
   content = ''
   if method == 'POST':
+
     env['CONTENT_LENGTH'] = h['content-length']
-    env['CONTENT_TYPE'] = h['content-type']
+
+    #if 'content-type' not in h:
+     # h['content-type'] = 'text/html'
+    try:
+      environ['CONTENT_TYPE'] = headers['content-type']
+    except:
+      pass
+      
+    #env['CONTENT_TYPE'] = h['content-type']
+
     content = get_content(conn, h)
+
 
 
   env['wsgi.input'] = StringIO(content)
@@ -134,7 +145,9 @@ def handle_connection(conn, host, port, app_type):
   else:
     ze_app = make_app(app_type)
 
+
   r = ze_app(env, start_response)
+
 
   # validator
   # validator_app = validator(ze_app)
@@ -142,6 +155,7 @@ def handle_connection(conn, host, port, app_type):
 
   for data in r:
     conn.send(data)
+
 
   conn.close()
 
@@ -197,7 +211,6 @@ def main():
   elif app == 'myapp':
     app_type = 'myapp'
   '''
-
 
 
   s = socket.socket()         # Create a socket object

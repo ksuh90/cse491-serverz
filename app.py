@@ -17,6 +17,7 @@ response = {
 
 
 def app(environ, start_response):
+
     # initialize jinja2 variables
     loader = jinja2.FileSystemLoader('./templates')
     env = jinja2.Environment(loader=loader)
@@ -67,11 +68,23 @@ def app(environ, start_response):
 
     if environ['PATH_INFO'][:5] == '/pics':
         return get_pics(environ['PATH_INFO'][5:])
-    #print args['path']
-        
 
-   #print environ['PATH_INFO']
+    if environ['path'] == '/comment_process':
+        #form = cgi.FieldStorage(fp=environ['wsgi.input'], environ=environ)
+        title = str(form['title'].value)
+        body = str(form['body'].value)
 
+        #new_messages = self.get_messages_since(last_time)
+        #xml = self.format_response(new_messages, time.time())
+
+        # done; return whatever we've got.
+        start_response("200 OK", [('Content-type', 'text/html')])
+        print "HAHAHAHAHHAA"
+         
+        print 'title : ' + title
+        print 'body : ' + body
+        return 1
+ 
 
     return [bytes(template.render(args))]
 
