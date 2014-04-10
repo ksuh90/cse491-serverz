@@ -94,6 +94,24 @@ class RootDirectory(Directory):
         return len(image.images)
 
 
+    @export(name='add_comment')
+    def add_comment(self):
+        response = quixote.get_response()
+        request = quixote.get_request()
+
+        try:
+            name = str(request.form['name'])
+        except:
+            name = 'no name'
+
+        try:
+            body = str(request.form['body'])
+        except:
+            body = ''
+
+        image.add_comment(name, body)
+
+
 
 def retrieve_image(request):
     try:

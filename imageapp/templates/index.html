@@ -13,6 +13,13 @@ function onPost() {
 	cellName.innerHTML = $("#name")[0].value;
 	cellBody.innerHTML = $("#body")[0].value;
 
+	var data = { 	name : $("#name")[0].value, 
+					body : $("#body")[0].value
+				};
+	$.post('add_comment', data, function(result){
+
+	});
+
 	$("#name")[0].value = "";
 	$("#body")[0].value = "";
 
@@ -20,32 +27,6 @@ function onPost() {
 	var rows = document.getElementById("comment_table").getElementsByTagName("tr").length;
 
 	$("#num_comments")[0].innerHTML = rows.toString();
-	
-
-	/*$.ajax({
-	   type: "post",
-	   dataType: 'jsonp',
-	   url: "comment_process.php",
-	   data: JSON.stringify({ name : $("#name").value, body : $("body").value }),
-	   success: function(response) {
-
-	   		console.log(response);
-	       
-	   }
-	   
-	});*/
-	/*var post_obj = { 
-		name : $("#name").value, 
-		body : $("body").value 
-	};
-
-	$.post('/comment_process', post_obj, function(result) {
-		console.log(result);
-		console.log('hello world!!');
-
-
-	});*/
-
 }
 
 </script>
