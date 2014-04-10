@@ -1,5 +1,7 @@
 import quixote
 from quixote.directory import Directory, export, subdir
+from quixote.util import StaticFile
+import os.path
 
 from . import html, image, style
 
@@ -35,15 +37,29 @@ class RootDirectory(Directory):
 
 
 
+    @export(name='image_count')
+    def image_count(self):
+        return image.get_num_images()
+
+
+
     @export(name='image_raw')
     def image_raw(self):
 
         response = quixote.get_response()
         request = quixote.get_request()
 
-        img = retrieve_image(request)
+        try:
+            i = int(request.form['num'])
+        except:
+            i = -1
 
+        # img = retrieve_image(request)
+        img = image.retrieve_image(i)
+
+       
         filename = img.filename
+
         if filename.lower() in ('jpg', 'jpeg'):
             response.set_content_type('image/jpeg')
         elif filename.lower() in ('tif',' tiff'):
