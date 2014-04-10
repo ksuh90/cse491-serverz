@@ -1,7 +1,7 @@
 import quixote
 from quixote.directory import Directory, export, subdir
 
-from . import html, image
+from . import html, image, style
 
 class RootDirectory(Directory):
     _q_exports = []
@@ -53,6 +53,20 @@ class RootDirectory(Directory):
         return img.data
 
 
+    @export(name='style')
+    def style(self):
+
+        response = quixote.get_response()
+        request = quixote.get_request()
+
+        style = retrieve_style(request)
+
+        response.set_content_type('text/css')
+
+        return style.data
+
+
+
     @export(name='list_of_images')
     def list_of_images(self):
         return html.render('list_of_images.html')
@@ -72,3 +86,9 @@ def retrieve_image(request):
         img = image.get_latest_image()
 
     return img
+
+
+def retrieve_style(request):
+    return style.get_style(0)
+
+

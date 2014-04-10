@@ -4,8 +4,10 @@ from quixote.publish import Publisher
 
 # this imports the class RootDirectory from the file 'root.py'
 from .root import RootDirectory
-from . import html, image
+from . import html, image, style
 #import os
+
+
 
 def create_publisher():
      p = Publisher(RootDirectory(), display_exceptions='plain')
@@ -15,6 +17,9 @@ def create_publisher():
 
 def setup():                            # stuff that should be run once.
     html.init_templates()
+
+    style_data = open('imageapp/style/style.css', 'rb').read()
+    style.add_style('imageapp/style/style.css', style_data)
 
     img_data = open('imageapp/tux.png', 'rb').read()
     image.add_image('imageapp/tux.png', img_data)
