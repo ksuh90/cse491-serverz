@@ -46,3 +46,20 @@
  * Revised root.py to handle jpeg and tiff extensions.
  * Added url handler for images in image app. Refined image.py, root.py,
  * index.html, image.html to link images via url GET.
+
+ 2014-04-10 Kang-One Suh
+
+ * Integrated cookieapp and sqlite.
+ * Applied oswd template to imageapp.
+    - Revised template files
+    - updated root.py to handle stylesheet for the template.
+    - added custom styles to style.css
+ * Nosql db integration
+    - revised index template, root.py, and image.py to talk to db via REST api.
+    - Comments entered in index uploads to a nosql cloud database.
+    - every comment is stored as a json document and POSTed to the db.
+    - to view the uploaded comments, 
+      query : https://cse491.cloudant.com/imageapp/comments
+       (username: cse491, pw: serverz491) 
+    - need to work on deletion
+

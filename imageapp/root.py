@@ -1,7 +1,9 @@
 import quixote
 from quixote.directory import Directory, export, subdir
+from quixote.util import StaticFile
+import os.path
 
-from . import html, image
+from . import html, image, style
 
 class RootDirectory(Directory):
     _q_exports = []
@@ -35,15 +37,29 @@ class RootDirectory(Directory):
 
 
 
+    @export(name='image_count')
+    def image_count(self):
+        return image.get_num_images()
+
+
+
     @export(name='image_raw')
     def image_raw(self):
 
         response = quixote.get_response()
         request = quixote.get_request()
 
-        img = retrieve_image(request)
+        try:
+            i = int(request.form['num'])
+        except:
+            i = -1
 
+        # img = retrieve_image(request)
+        img = image.retrieve_image(i)
+
+       
         filename = img.filename
+
         if filename.lower() in ('jpg', 'jpeg'):
             response.set_content_type('image/jpeg')
         elif filename.lower() in ('tif',' tiff'):
@@ -51,6 +67,20 @@ class RootDirectory(Directory):
         else:
             response.set_content_type('image/png')
         return img.data
+
+
+    @export(name='style')
+    def style(self):
+
+        response = quixote.get_response()
+        request = quixote.get_request()
+
+        style = retrieve_style(request)
+
+        response.set_content_type('text/css')
+
+        return style.data
+
 
 
     @export(name='list_of_images')
@@ -64,6 +94,24 @@ class RootDirectory(Directory):
         return len(image.images)
 
 
+    @export(name='add_comment')
+    def add_comment(self):
+        response = quixote.get_response()
+        request = quixote.get_request()
+
+        try:
+            name = str(request.form['name'])
+        except:
+            name = 'no name'
+
+        try:
+            body = str(request.form['body'])
+        except:
+            body = ''
+
+        image.add_comment(name, body)
+
+
 
 def retrieve_image(request):
     try:
@@ -72,3 +120,9 @@ def retrieve_image(request):
         img = image.get_latest_image()
 
     return img
+
+
+def retrieve_style(request):
+    return style.get_style(0)
+
+

@@ -14,13 +14,9 @@ from quixote.demo.altdemo import create_publisher
 #from wsgiref.validate import validator
 from wsgiref.simple_server import make_server
 
-# quotes
 import quotes
-
-# chat
 import chat
-
-# import the imageapp
+import cookieapp
 import imageapp
 imageapp.setup()
 
@@ -30,12 +26,12 @@ _the_app = None
 
 # to run quixote
 
-def make_app(app_type):
+def make_app(app_name):
 
   global _the_app
 
   if _the_app is None:
-    if app_type == 'altdemo':
+    if app_name == 'altdemo':
       p = create_publisher()
     else:
       p = imageapp.create_publisher()
@@ -45,7 +41,7 @@ def make_app(app_type):
 
 
 
-def handle_connection(conn, host, port, app_type):
+def handle_connection(conn, host, port, app_name):
   # a dict to store request data
   env = {}
 
@@ -86,6 +82,7 @@ def handle_connection(conn, host, port, app_type):
   env['wsgi.multiprocess'] = False
   env['wsgi.run_once'] = False
   env['wsgi.url_scheme'] = url_scheme.lower()
+  env['HTTP_COOKIE'] = h['cookie'] if 'cookie' in h.keys() else ''
 
   # contruct env
   buf = StringIO(request)
@@ -134,16 +131,18 @@ def handle_connection(conn, host, port, app_type):
   env['wsgi.input'] = StringIO(content)
 
   #if make_app == ''
-  if app_type == 'myapp':
+  if app_name == 'myapp':
     ze_app = make_my_app()
 
-  elif app_type == 'quotes':
+  elif app_name == 'quotes':
     quotes_dir = './quotes/'
     ze_app = quotes.make_quotes_app(quotes_dir + 'quotes.txt', quotes_dir + 'html')
-  elif app_type == 'chat':
+  elif app_name == 'chat':
     ze_app = chat.make_chat_app('./chat/html')
+  elif app_name == 'cookie':
+    ze_app = cookieapp.wsgi_app
   else:
-    ze_app = make_app(app_type)
+    ze_app = make_app(app_name)
 
 
   r = ze_app(env, start_response)
@@ -180,7 +179,7 @@ def get_content(conn, headers):
 
 
 def get_args():
-  app_list = ['altdemo', 'image', 'myapp', 'quotes', 'chat']
+  app_list = ['altdemo', 'image', 'myapp', 'quotes', 'chat', 'cookie']
   parser = argparse.ArgumentParser()
   parser.add_argument('-A', action = "store",
                             dest = 'arg_app',
@@ -202,16 +201,6 @@ def main():
 
   app, port = get_args()
  
-  '''
-  app_type = ''
-  if app == 'image':
-    app_type == 'image'
-  elif app == 'altdemo':
-    app_type = 'altdemo'
-  elif app == 'myapp':
-    app_type = 'myapp'
-  '''
-
 
   s = socket.socket()         # Create a socket object
   host = socket.getfqdn()     # Get pathal machine name
