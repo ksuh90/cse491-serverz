@@ -63,3 +63,9 @@
        (username: cse491, pw: serverz491) 
     - need to work on deletion
 
+  2014-04-17 Kang-One Suh
+  * Extended nosql integration.
+    - comments in index page is now consistent with the nosql db
+      + updated root.py and index.html to interact with the db.
+    
+

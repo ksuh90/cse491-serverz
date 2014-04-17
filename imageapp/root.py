@@ -2,6 +2,8 @@ import quixote
 from quixote.directory import Directory, export, subdir
 from quixote.util import StaticFile
 import os.path
+import requests
+import json
 
 from . import html, image, style
 
@@ -112,6 +114,28 @@ class RootDirectory(Directory):
         image.add_comment(name, body)
 
 
+    @export(name='get_comments')
+    def get_comments(self):
+        response = quixote.get_response()
+        request = quixote.get_request()
+
+        resp = requests.get(
+            "https://cse491.cloudant.com/imageapp/comments",
+            auth=('cse491', 'serverz491')
+        )
+        resp = json.loads(resp.text)
+        
+        out = ''
+
+        for comment in resp['comments']:
+            tr = '<tr><td>%s</td><td>%s</td></tr>' % (comment['name'], comment['body'])
+            out += tr
+
+        return out
+
+        
+
+
 
 def retrieve_image(request):
     try:
@@ -124,5 +148,8 @@ def retrieve_image(request):
 
 def retrieve_style(request):
     return style.get_style(0)
+
+
+
 
 
