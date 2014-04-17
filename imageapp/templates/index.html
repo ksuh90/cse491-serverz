@@ -34,8 +34,9 @@ $(function() {
 	$.post('get_comments', data, function(result){
 		var table = document.getElementById("comment_table");
 		table.innerHTML = result;
+	});
 
-	});	
+	
 });
 
 </script>
@@ -58,6 +59,7 @@ $(function() {
 					<img width=40% src='image_raw'/>
 				</div>
 			</div>
+
 			<div id="menu">
 				<ul>	
 					<li><a href='upload'>Upload an image</a></li>
@@ -65,7 +67,10 @@ $(function() {
 					<li><a href='list_of_images'>All images</a></li>						
 				</ul>
 			</div>
+			<h5>Title : <span id="title"></span></h5>
+			<h5>Description : <span id="description"></span></h5>
 	</div>
+
 </div>
 
 <div class="content">

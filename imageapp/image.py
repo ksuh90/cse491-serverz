@@ -100,39 +100,3 @@ def get_num_images():
         return 0
 
 
-
-def add_comment(name, body):
-
-    ##### nosql database insertion #####
-    resp_doc = requests.get(
-        "https://cse491.cloudant.com/imageapp/comments",
-        auth=('cse491', 'serverz491'),
-        )
-
-    resp_doc = json.loads(resp_doc.text)
-
-    print "get comment doc"
-    print resp_doc
-
-    comment = {}
-    comment['name'] = name
-    comment['body'] = body
-
-    index = len(resp_doc['comments'])
-    resp_doc['comments'].insert(index, comment)
-    resp_doc['_id'] = 'comments'
-
-    print "post doc"
-    print resp_doc
-    headers = {"content-type": "application/json"}
-
-
-    resp = requests.post(
-        "http://cse491.cloudant.com/imageapp",
-        auth=('cse491', 'serverz491'),
-        data=json.dumps(resp_doc),
-        headers=headers
-        )
-    print 'response status'
-    print resp
-

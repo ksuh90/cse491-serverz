@@ -68,4 +68,8 @@
     - comments in index page is now consistent with the nosql db
       + updated root.py and index.html to interact with the db.
     
-
+  * Added metadata uploading
+    - metadata is entered in upload.html. It is then uploaded to the nosql db
+      via REST api.
+     + added aditional inputs in upload template and nosql handler for the data
+       in root.py. 

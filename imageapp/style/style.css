@@ -34,7 +34,7 @@ hr { height: 1px; border-style: none; color: #d0d0d0; background-color: #C0C0C0;
 	#top #icons img { padding-right: 2px; border: 0 }
 
 /* Second part */
-#prec { 	height: 220px; 	margin:0; padding: 0; background: #F6F6F6; border-bottom: 1px solid #DCDCDC; overflow: hidden; margin-bottom: 15px }
+#prec { 	height: 280px; 	margin:0; padding: 0; background: #F6F6F6; border-bottom: 1px solid #DCDCDC; overflow: hidden; margin-bottom: 15px }
 	#wrap { margin: 0 auto; width: 800px; }
 		#wrap #pic { float: right; background: #F6F6F6 no-repeat; height: 199px; width: 589px; overflow: hidden}
 			#wrap #pic #slogan { float: right; padding: 25px 30px 10px 30px; text-align: right }
