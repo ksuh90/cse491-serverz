@@ -63,3 +63,20 @@
        (username: cse491, pw: serverz491) 
     - need to work on deletion
 
+  2014-04-17 Kang-One Suh
+  * Extended nosql integration.
+    - comments in index page is now consistent with the nosql db
+      + updated root.py and index.html to interact with the db.
+    
+  * Added metadata uploading
+    - metadata is entered in upload.html. It is then uploaded to the nosql db
+      via REST api. Still need to revise template and root in order to present
+      the metadata. Had issues with uploading image as an attachment to a
+      document in nosql db. Still working on to resolve this problem.
+     + added aditional inputs in upload template and nosql handler for the data
+       in root.py. 
+  
+  * Raw JSON docs in db may be viewed through the following queries:
+    https://cse491.cloudant.com/imageapp/comments
+    https://cse491.cloudant.com/imageapp/meta
+    ( username: cse491, pw: serverz491 )

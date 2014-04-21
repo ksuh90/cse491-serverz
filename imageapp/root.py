@@ -2,11 +2,14 @@ import quixote
 from quixote.directory import Directory, export, subdir
 from quixote.util import StaticFile
 import os.path
+import requests
+import json
 
 from . import html, image, style
 
 class RootDirectory(Directory):
     _q_exports = []
+
 
     @export(name='')                    # this makes it public.
     def index(self):
@@ -26,8 +29,23 @@ class RootDirectory(Directory):
         print 'received file with name:', the_file.base_filename
         data = the_file.read(the_file.get_size())
 
-        #image.add_image(data)
         image.add_image(the_file.base_filename, data)
+
+
+        ### sql metadata insertion ###
+        metadata = {}
+        metadata['title'] = request.form['title'];
+        metadata['description'] = request.form['description']
+
+        resp_doc = get_doc('meta')
+
+
+        resp_doc['metadata'][str(the_file)] = metadata
+      
+        print "post doc"
+        print resp_doc
+
+        resp = post_doc(resp_doc)
 
         return quixote.redirect('./')
 
@@ -54,7 +72,6 @@ class RootDirectory(Directory):
         except:
             i = -1
 
-        # img = retrieve_image(request)
         img = image.retrieve_image(i)
 
        
@@ -99,17 +116,42 @@ class RootDirectory(Directory):
         response = quixote.get_response()
         request = quixote.get_request()
 
-        try:
-            name = str(request.form['name'])
-        except:
-            name = 'no name'
 
-        try:
-            body = str(request.form['body'])
-        except:
-            body = ''
+        ##### nosql database insertion #####
+        resp_doc = get_doc('comments')
+    
+        comment = {}
+        comment['name'] = str(request.form['name'])
+        comment['body'] = str(request.form['body'])
 
-        image.add_comment(name, body)
+        index = len(resp_doc['comments'])
+        resp_doc['comments'].insert(index, comment)
+        resp_doc['_id'] = 'comments'
+
+        resp = post_doc(resp_doc)
+
+        print resp
+        
+
+
+    @export(name='get_comments')
+    def get_comments(self):
+   
+        response = quixote.get_response()
+        request = quixote.get_request()
+        
+        resp = get_doc('comments')
+        out = ''
+
+        for comment in resp['comments']:
+            tr = '<tr><td>%s</td><td>%s</td></tr>' % (comment['name'], comment['body'])
+            out += tr
+
+        return out
+
+
+
+        
 
 
 
@@ -125,4 +167,28 @@ def retrieve_image(request):
 def retrieve_style(request):
     return style.get_style(0)
 
+
+def get_doc(doc_id):
+    resp_doc = requests.get(
+        "https://cse491.cloudant.com/imageapp/" + doc_id,
+        auth=('cse491', 'serverz491')
+        )
+
+    return json.loads(resp_doc.text)
+
+
+def post_doc(data):
+    headers = {"content-type": "application/json"}
+
+    print 'POSTING DATA...'
+    print json.dumps(data)
+    print
+
+    resp = requests.post(
+        "http://cse491.cloudant.com/imageapp/",
+        auth=('cse491', 'serverz491'),
+        data=json.dumps(data),
+        headers=headers
+        )
+    return resp
 
