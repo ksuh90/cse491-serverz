@@ -80,3 +80,25 @@
     https://cse491.cloudant.com/imageapp/comments
     https://cse491.cloudant.com/imageapp/meta
     ( username: cse491, pw: serverz491 )
+
+
+  2014-04-24 Kang-One Suh
+
+  * Added disqus to myapp
+    - Added disqus universal code in index.html
+
+  * Added login/logout/signup feature.
+    - mostly updated root.py to handle all nosql db interaction, cookie settings, and authentication.
+    - Added templates for login/signup.
+    - If user is logged in, a hello message appears in the header below the title in index page.
+      All unnecessary links are hidden accordingly.
+
+  * Expanded nosql integration.
+    - Now uploads user documents with an _id in the form of "user:<username>".
+        + holds username, password, and email address
+
+    - user document is retrieved for authentication whenever user tries to login.
+
+    - Raw JSON docs of user info may be viewed through the following queries:
+      https://cse491.cloudant.com/imageapp/user:<username>
+      ( db username: cse491, pw: serverz491 )

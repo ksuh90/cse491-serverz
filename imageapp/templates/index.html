@@ -63,7 +63,7 @@ $(function() {
 
 			<div id="menu">
 				<ul>	
-					<li><a href='upload'>Upload an image</a></li>
+					<li id='upload_link'><a href='upload'>Upload an image</a></li>
 					<li><a href='image'>Show most recent image</a></li>
 					<li><a href='list_of_images'>All images</a></li>
 					<li id='signup_link'><a href='signup'>Signup</a></li>
@@ -81,7 +81,7 @@ $(function() {
 	<div id="ad">
 		<h1>Comments</h1>
 			<form id="comment_form" method="POST" onsubmit="return false;">
-				<input id="name" type="text" placeholder="Your name"></input>
+				<input id="name" type="text" value='{{ username }}'></input>
 				</br>
 				<textarea id="body" type="text" style="width:30%;" placeholder="Enter comment"></textarea>
 				</br>
@@ -158,20 +158,19 @@ $(function() {
 </div>
 
 <script type="text/javascript">
+$('#name').hide();
 var username = $.trim($('#username').text())
 console.log(username)
 if(username != '')
 {
-  $('#hello_msg').show()
-  $('#logout_link').show()
   $('#signup_link').hide()
   $('#login_link').hide()
 
 } else {
   $('#hello_msg').hide()
   $('#logout_link').hide()
-  $('#signup_link').show()
-  $('#login_link').show()
+  $('#upload_link').hide()
+  $('#comment_form').hide()
 }
 </script>
 {% endblock %}
