@@ -11,13 +11,85 @@ class RootDirectory(Directory):
     _q_exports = []
 
 
+    def find_username(self):
+        username = quixote.get_cookie('username')
+        if not username:
+            username = ''
+        return dict(username = username)
+
+
     @export(name='')                    # this makes it public.
     def index(self):
-        return html.render('index.html')
+        return html.render('index.html', self.find_username())
 
     @export(name='upload')
     def upload(self):
         return html.render('upload.html')
+
+    @export(name='signup')
+    def signup(self):
+        return html.render('signup.html')
+
+    @export(name='login')
+    def login(self):
+        return html.render('login.html')
+
+    @export(name='logout')
+    def logout(self):
+        response = quixote.get_response()
+        response.set_cookie('username', 'NONE; Expires=Thu, 01-Jan-1970 00:00:01 GMT')
+        return quixote.redirect('./') 
+
+
+    @export(name='signup_receive')
+    def signup_receive(self):
+        request = quixote.get_request()
+
+        username = request.form['username']
+        password = request.form['password']
+        email = request.form['email']
+
+        if len(username) == 0 or len(password) == 0 or len(email) == 0:
+            return quixote.redirect('./')
+
+        ### upload user info to nosql db ###
+        doc = {}
+        doc['_id'] = 'user:' + username
+        doc['username'] = username
+        doc['password'] = password
+        doc['email'] = email
+        post_doc(doc)
+
+        return quixote.redirect('./')
+
+
+    def set_cookie(self, username):
+        quixote.get_response().set_cookie('username', username)
+
+
+    @export(name='login_receive')
+    def login_receive(self):
+        request = quixote.get_request()
+
+        username = request.form['username']
+        password = request.form['password']
+
+        ### get user document from nosql db ###
+        doc_id = 'user:' + username
+        resp = get_doc(doc_id)
+        
+        try:
+            if resp['password'] == password:
+                self.set_cookie(username)   # set the cookie
+               
+        except:
+            return quixote.redirect('./')
+
+
+        return quixote.redirect('./')
+
+
+
 
     @export(name='upload_receive')
     def upload_receive(self):
@@ -36,18 +108,13 @@ class RootDirectory(Directory):
         metadata = {}
         metadata['title'] = request.form['title'];
         metadata['description'] = request.form['description']
-
         resp_doc = get_doc('meta')
-
-
         resp_doc['metadata'][str(the_file)] = metadata
-      
-        print "post doc"
-        print resp_doc
-
         resp = post_doc(resp_doc)
 
+
         return quixote.redirect('./')
+
 
     @export(name='image')
     def image(self):
@@ -151,9 +218,7 @@ class RootDirectory(Directory):
 
 
 
-        
-
-
+    
 
 def retrieve_image(request):
     try:
